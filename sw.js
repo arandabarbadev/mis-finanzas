@@ -1,6 +1,6 @@
 // Service worker: la red manda (los cambios de Pages llegan al instante)
 // y la caché queda solo como respaldo para abrir offline.
-const CACHE = 'misfinanzas-v3';
+const CACHE = 'misfinanzas-v4';
 const ARCHIVOS = [
   './',
   './index.html',

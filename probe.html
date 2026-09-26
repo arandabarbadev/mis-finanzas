@@ -10,6 +10,8 @@ h1{font-size:1.25rem;margin-bottom:16px}
 li{margin:12px 0;font-size:1.05rem;list-style:none}
 .ok{color:#34d399}.fail{color:#f87171}.pend{color:#fbbf24}
 #extra{margin-top:16px;color:#8a94a6}
+.reparar{display:block;width:100%;margin-top:18px;background:#f59e0b;color:#1c1200;border:0;border-radius:12px;padding:14px;font-size:1rem;font-weight:700;cursor:pointer}
+.nota{font-size:.8rem;color:#8a94a6;margin-top:8px}
 </style>
 </head>
 <body>
@@ -21,7 +23,10 @@ li{margin:12px 0;font-size:1.05rem;list-style:none}
   <li id="p4" class="pend">⏳ Descarga del SDK de Firebase…</li>
   <li id="p5" class="pend">⏳ Firebase Auth responde…</li>
 </ul>
-<p id="extra">Abre esta página, espera 20 segundos y cuenta qué líneas se pusieron en verde o en rojo.</p>
+<p id="extra">Espera 20 segundos y mira qué líneas se ponen en verde o en rojo.</p>
+
+<button id="btnReparar" class="reparar" hidden>🧹 Reparación total: borrar caché del service worker + datos internos de Firebase de este navegador</button>
+<p id="notaReparar" class="nota" hidden>Solo borra la sesión guardada de Firebase (tendrás que volver a entrar con Google en tus apps de este navegador). Tus datos de la nube no se tocan para nada.</p>
 
 <script type="module">
 const ok = (id, txt) => { console.log('PROBE|' + id + '|OK|' + txt); const el = document.getElementById(id); el.className = 'ok'; el.textContent = '✅ ' + txt; };
@@ -67,7 +72,7 @@ try {
   const auth = auth9.getAuth(app);
   const t = setTimeout(() => {
     fail('p5', 'Firebase Auth: NO responde en 15 segundos');
-    document.getElementById('extra').textContent = '→ Si esta línea sale roja, pásale la lista a Claude.';
+    document.getElementById('extra').textContent = 'Firebase Auth no arranca en este navegador: usa el botón naranja de abajo y luego abre Mis Finanzas.';
   }, 15000);
   auth9.onAuthStateChanged(auth, u => {
     clearTimeout(t);
@@ -76,6 +81,38 @@ try {
 } catch (e) {
   fail('p4', 'SDK de Firebase: FALLO al descargar (' + e.message + ')');
 }
+
+// El botón de reparación aparece cuando algo ha fallado (o siempre, por si acaso)
+setTimeout(() => {
+  document.getElementById('btnReparar').hidden = false;
+  document.getElementById('notaReparar').hidden = false;
+}, 16000);
+
+document.getElementById('btnReparar').addEventListener('click', async () => {
+  const btn = document.getElementById('btnReparar');
+  btn.textContent = '🧹 Borrando…';
+  try {
+    // 1) quitar todos los service workers de esta web
+    if (navigator.serviceWorker){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    // 2) borrar las bases de datos internas de Firebase de este navegador
+    const nombres = ['firebaseLocalStorageDb', 'firebase-appcheck-internal-db'];
+    try {
+      const dbs = indexedDB.databases ? await indexedDB.databases() : [];
+      dbs.forEach(d => { if (d.name && d.name.toLowerCase().includes('firebase')) nombres.push(d.name); });
+    } catch (e) {}
+    await Promise.all([...new Set(nombres)].map(n => new Promise(res => {
+      const rq = indexedDB.deleteDatabase(n);
+      rq.onsuccess = rq.onerror = rq.onblocked = () => res();
+    })));
+    btn.textContent = '✅ Listo. Cierra todas las pestañas de Mis Finanzas, abre una nueva y entra a la app.';
+    console.log('PROBE|reparar|OK');
+  } catch (e) {
+    btn.textContent = '❌ Algo falló al reparar: ' + e.message;
+  }
+});
 </script>
 </body>
 </html>
