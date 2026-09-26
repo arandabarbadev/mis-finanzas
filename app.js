@@ -9,9 +9,6 @@ import {
   timestampDe
 } from './db.js';
 
-// Marcador temporal de diagnóstico (se quita tras verificar el arranque)
-document.body.dataset.arranque = 'js';
-
 const PALETA = ['#34d399', '#22d3ee', '#60a5fa', '#a78bfa', '#f472b6', '#fb7185',
                 '#fbbf24', '#f97316', '#4ade80', '#2dd4bf', '#e879f9', '#94a3b8'];
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -96,8 +93,19 @@ function colorCategoria(id){
 function avisoDb(mostrar){ $('avisoDb').hidden = !mostrar; }
 
 // ---------- autenticación ----------
+// Si Firebase Auth no responde en 10 s, avisamos en vez de quedarnos cargando
+const relojGuardian = setTimeout(() => {
+  if (!$('cargando').hidden){
+    $('cargando').hidden = true;
+    $('pantallaLogin').hidden = false;
+    const err = $('loginError');
+    err.hidden = false;
+    err.textContent = '⏱️ Firebase no respondió. Revisa tu conexión (o desactiva bloqueadores) y recarga la página.';
+  }
+}, 10000);
+
 onAuthStateChanged(auth, usuario => {
-  document.body.dataset.arranque = 'auth';
+  clearTimeout(relojGuardian);
   $('cargando').hidden = true;
   cancelarOyentes();
   if (!usuario){
