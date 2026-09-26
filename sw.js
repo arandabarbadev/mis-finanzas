@@ -1,5 +1,6 @@
-// Service worker: precache del shell + CDN para que la app abra offline
-const CACHE = 'misfinanzas-v2';
+// Service worker: la red manda (los cambios de Pages llegan al instante)
+// y la caché queda solo como respaldo para abrir offline.
+const CACHE = 'misfinanzas-v3';
 const ARCHIVOS = [
   './',
   './index.html',
@@ -22,13 +23,24 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(claves =>
     Promise.all(claves.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
+  ).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  // cache-first para lo estático; el resto pasa directo a la red
+  const mismoOrigen = new URL(e.request.url).origin === location.origin;
+
+  if (!mismoOrigen){
+    // CDN con versión en la URL (inmutables): caché primero
+    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    return;
+  }
+  // Archivos propios: RED primero y caché de respaldo (así los updates llegan ya)
   e.respondWith(
-    caches.match(e.request).then(resp => resp || fetch(e.request))
+    fetch(e.request).then(r => {
+      const copia = r.clone();
+      caches.open(CACHE).then(c => c.put(e.request, copia)).catch(() => {});
+      return r;
+    }).catch(() => caches.match(e.request))
   );
 });
