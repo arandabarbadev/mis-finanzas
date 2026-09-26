@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // App vieja "deberes": documento /usuarios/{uid} (NO TOCAR)
+    match /usuarios/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Otras apps (ufc-picks, examenes, notas, mi-semana...) (NO TOCAR)
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Mis Finanzas v2: subcolecciones bajo /usuarios/{uid}
+    // Solo el dueño (y además solo el email autorizado) puede entrar
+    match /usuarios/{uid}/{document=**} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == uid
+        && request.auth.token.email == 'arandabarbarafa@gmail.com';
+    }
+  }
+}
