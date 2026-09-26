@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0e14">
-<title>Mis Finanzas</title>
+<title>Mis Finanzas · v6</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%2322c55e'/%3E%3Ctext x='256' y='345' font-size='280' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3E%E2%82%AC%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
@@ -15,8 +15,12 @@
 <!-- Pantalla de carga inicial -->
 <div id="cargando" class="cargando">
   <div class="girar">💶</div>
-  <p>Cargando… · <strong>v5</strong></p>
+  <p id="cargaInfo">Cargando…</p>
 </div>
+<script>
+  // Marcador inline: se ejecuta siempre, sin módulos (diagnóstico de arranque)
+  document.getElementById('cargaInfo').textContent = 'HTML v6 · ' + new Date().toLocaleTimeString('es-ES');
+</script>
 
 <!-- LOGIN -->
 <section id="pantallaLogin" class="pantalla-login" hidden>

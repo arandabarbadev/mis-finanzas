@@ -9,6 +9,9 @@ import {
   timestampDe
 } from './db.js';
 
+// Diagnóstico de arranque: esta línea solo aparece si TODO cargó (incluido Firebase)
+document.getElementById('cargaInfo') && (document.getElementById('cargaInfo').textContent += ' · App ok');
+
 const PALETA = ['#34d399', '#22d3ee', '#60a5fa', '#a78bfa', '#f472b6', '#fb7185',
                 '#fbbf24', '#f97316', '#4ade80', '#2dd4bf', '#e879f9', '#94a3b8'];
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];

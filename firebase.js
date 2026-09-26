@@ -47,4 +47,7 @@ export function salir() { return signOut(auth); }
 // Recoger el resultado del login por redirección (móvil)
 getRedirectResult(auth).catch(() => {});
 
+// Diagnóstico de arranque: el SDK llegó entero
+document.getElementById('cargaInfo') && (document.getElementById('cargaInfo').textContent += ' · SDK ok');
+
 export { onAuthStateChanged };
