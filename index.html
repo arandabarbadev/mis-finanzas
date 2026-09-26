@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0e14">
+<title>Mis Finanzas</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%2322c55e'/%3E%3Ctext x='256' y='345' font-size='280' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3E%E2%82%AC%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --fondo:#0b0e14; --panel:#141a24; --borde:#232c3b;
+    --texto:#e8edf5; --suave:#8a94a6;
+    --verde:#34d399; --rojo:#f87171; --acento:#22c55e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{color-scheme:dark}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1000px 500px at 50% -10%, #10261c 0%, transparent 60%), var(--fondo);
+    color:var(--texto); min-height:100vh;
+  }
+
+  header{max-width:680px;margin:0 auto;padding:26px 16px 0}
+  h1{font-size:1.35rem;letter-spacing:.3px;margin-bottom:14px}
+
+  .saldo{
+    background:linear-gradient(135deg,#123527,#0f2b1e);
+    border:1px solid #1d4433;border-radius:18px;padding:18px 20px;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .saldo span{color:#9fe8c9;font-size:.8rem;text-transform:uppercase;letter-spacing:1px}
+  .saldo strong{font-size:1.9rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .saldo strong.pos{color:var(--verde)}
+  .saldo strong.neg{color:var(--rojo)}
+
+  main{max-width:680px;margin:0 auto;padding:16px 16px 30px;display:flex;flex-direction:column;gap:14px}
+
+  .mes{display:flex;gap:8px}
+  .mes input{flex:1;text-align:center;background:var(--panel);border:1px solid var(--borde);color:var(--texto);border-radius:12px;padding:10px;font-size:1rem}
+  .mes button{width:46px;background:var(--panel);border:1px solid var(--borde);color:var(--texto);border-radius:12px;font-size:1.2rem;cursor:pointer}
+  .mes button:hover{border-color:#31405a}
+
+  .tarjetas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .tarjeta{background:var(--panel);border:1px solid var(--borde);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:4px}
+  .tarjeta span{font-size:.72rem;color:var(--suave);text-transform:uppercase;letter-spacing:.5px}
+  .tarjeta strong{font-size:1.02rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tarjeta.ing strong{color:var(--verde)}
+  .tarjeta.gas strong{color:var(--rojo)}
+  .tarjeta.bal strong.pos{color:var(--verde)}
+  .tarjeta.bal strong.neg{color:var(--rojo)}
+  @media(max-width:400px){.tarjeta strong{font-size:.9rem}}
+
+  .panel{background:var(--panel);border:1px solid var(--borde);border-radius:18px;padding:16px}
+  .panel h2{font-size:.78rem;color:var(--suave);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+
+  .segmento{display:flex;background:#0d1119;border:1px solid var(--borde);border-radius:12px;padding:4px;margin-bottom:12px}
+  .segmento button{flex:1;padding:9px;border:0;border-radius:9px;background:transparent;color:var(--suave);font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit}
+  .segmento button.activo[data-tipo="gasto"]{background:rgba(248,113,113,.15);color:var(--rojo)}
+  .segmento button.activo[data-tipo="ingreso"]{background:rgba(52,211,153,.15);color:var(--verde)}
+
+  form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  input,select{background:#0d1119;border:1px solid var(--borde);border-radius:12px;color:var(--texto);padding:11px 12px;font-size:1rem;width:100%;font-family:inherit}
+  input::placeholder{color:#5b667a}
+  input:focus,select:focus{outline:2px solid rgba(52,211,153,.4);border-color:var(--verde)}
+  .ancho{grid-column:1/-1}
+  .acciones{grid-column:1/-1;display:flex;gap:10px}
+  #btnGuardar{flex:1;background:var(--acento);color:#052e16;border:0;border-radius:12px;padding:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+  #btnGuardar:hover{filter:brightness(1.1)}
+  #btnCancelar{background:transparent;border:1px solid var(--borde);color:var(--suave);border-radius:12px;padding:12px 16px;cursor:pointer;font-family:inherit}
+
+  #lista{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .mov{display:flex;align-items:center;gap:10px;background:#0d1119;border:1px solid var(--borde);border-radius:14px;padding:10px 12px}
+  .icono{width:38px;height:38px;border-radius:50%;background:var(--panel);border:1px solid var(--borde);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+  .mov .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .info strong{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .info span{font-size:.78rem;color:var(--suave)}
+  .importe{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .mov.ingreso .importe{color:var(--verde)}
+  .mov.gasto .importe{color:var(--rojo)}
+  .btns{display:flex;gap:4px}
+  .btns button{background:transparent;border:0;border-radius:8px;padding:6px;cursor:pointer;font-size:.95rem;opacity:.7}
+  .btns button:hover{opacity:1;background:rgba(255,255,255,.06)}
+  .vacio{color:var(--suave);text-align:center;padding:18px;font-size:.95rem}
+
+  #categorias{display:flex;flex-direction:column;gap:10px}
+  .cat{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+  .cat-nombre{font-size:.85rem;white-space:nowrap}
+  .cat-barra{height:10px;background:#0d1119;border-radius:99px;overflow:hidden}
+  .cat-barra div{height:100%;border-radius:99px;background:linear-gradient(90deg,#f87171,#ef4444)}
+  .cat-total{font-size:.85rem;color:var(--suave);font-variant-numeric:tabular-nums}
+
+  .leyenda{display:flex;gap:14px;margin-bottom:10px;font-size:.78rem;color:var(--suave)}
+  .leyenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+  .leyenda .ing i{background:var(--verde)}
+  .leyenda .gas i{background:var(--rojo)}
+  #grafico{display:flex;gap:6px;align-items:flex-end}
+  .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .barras{height:130px;width:100%;display:flex;gap:4px;align-items:flex-end;justify-content:center}
+  .barra{width:16px;max-width:42%;border-radius:5px 5px 2px 2px}
+  .barra.ing{background:linear-gradient(180deg,#34d399,#059669)}
+  .barra.gas{background:linear-gradient(180deg,#f87171,#dc2626)}
+  .col .etq{font-size:.72rem;color:var(--suave);text-transform:uppercase}
+  .col.actual .etq{color:var(--verde);font-weight:700}
+
+  footer{text-align:center;color:var(--suave);font-size:.8rem;padding:10px 0 30px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💶 Mis Finanzas</h1>
+  <div class="saldo">
+    <span>Balance total</span>
+    <strong id="saldoTotal">0,00 €</strong>
+  </div>
+</header>
+
+<main>
+  <section class="mes">
+    <button id="mesAnterior" title="Mes anterior">‹</button>
+    <input type="month" id="filtroMes">
+    <button id="mesSiguiente" title="Mes siguiente">›</button>
+  </section>
+
+  <section class="tarjetas">
+    <div class="tarjeta ing"><span>Ingresos</span><strong id="tIngresos">—</strong></div>
+    <div class="tarjeta gas"><span>Gastos</span><strong id="tGastos">—</strong></div>
+    <div class="tarjeta bal"><span>Balance</span><strong id="tBalance">—</strong></div>
+  </section>
+
+  <section class="panel">
+    <h2 id="tituloForm">Añadir movimiento</h2>
+    <div class="segmento">
+      <button type="button" id="btnGasto" data-tipo="gasto" class="activo">Gasto</button>
+      <button type="button" id="btnIngreso" data-tipo="ingreso">Ingreso</button>
+    </div>
+    <form id="form">
+      <input class="ancho" id="concepto" placeholder="Concepto (ej: merienda)" required maxlength="40">
+      <input id="cantidad" inputmode="decimal" placeholder="Cantidad (ej: 4,50)" required>
+      <select id="categoria"></select>
+      <input type="date" id="fecha" required>
+      <div class="acciones">
+        <button type="submit" id="btnGuardar">Añadir</button>
+        <button type="button" id="btnCancelar" hidden>Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Movimientos del mes</h2>
+    <ul id="lista"></ul>
+    <p id="vacio" class="vacio" hidden>Todavía no hay movimientos este mes.</p>
+  </section>
+
+  <section class="panel" id="panelCategorias" hidden>
+    <h2>Gastos por categoría</h2>
+    <div id="categorias"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Últimos 6 meses</h2>
+    <div class="leyenda">
+      <span class="ing"><i></i>Ingresos</span>
+      <span class="gas"><i></i>Gastos</span>
+    </div>
+    <div id="grafico"></div>
+  </section>
+</main>
+
+<footer>Hecho por Rafa 💪</footer>
+
+<script>
+  const CLAVE = 'misfinanzas_datos';
+  const CAT_GASTOS = ['Comida','Transporte','Ocio','Ropa','Otros'];
+  const CAT_INGRESOS = ['Paga','Regalo','Otros'];
+  const EMOJIS = {Comida:'🍔', Transporte:'🚌', Ocio:'🎮', Ropa:'👕', Paga:'💰', Regalo:'🎁'};
+  const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const DIAS = ['dom','lun','mar','mié','jue','vie','sáb'];
+
+  const $ = id => document.getElementById(id);
+  const filtroMes = $('filtroMes'), conceptoIn = $('concepto'), cantidadIn = $('cantidad'),
+        categoriaIn = $('categoria'), fechaIn = $('fecha'), form = $('form');
+
+  let movimientos = cargar();
+  let tipo = 'gasto';
+  let editandoId = null;
+
+  function cargar(){
+    try { return JSON.parse(localStorage.getItem(CLAVE)) || []; }
+    catch { return []; }
+  }
+  function guardar(){ localStorage.setItem(CLAVE, JSON.stringify(movimientos)); }
+  function eur(n){ return n.toLocaleString('es-ES', {style:'currency', currency:'EUR'}); }
+  function esc(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function hoyISO(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function mesActual(){ return hoyISO().slice(0,7); }
+  function mesVisto(){ return filtroMes.value || mesActual(); }
+  function desplazarMes(mes, delta){
+    const [y, m] = mes.split('-').map(Number);
+    const d = new Date(y, m - 1 + delta, 1);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  }
+  function fechaBonita(iso){
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    return DIAS[dt.getDay()] + ' ' + d + ' ' + MESES[m-1];
+  }
+
+  // ---------- formulario ----------
+  function setTipo(nuevo){
+    tipo = nuevo;
+    $('btnGasto').classList.toggle('activo', tipo === 'gasto');
+    $('btnIngreso').classList.toggle('activo', tipo === 'ingreso');
+    const lista = tipo === 'gasto' ? CAT_GASTOS : CAT_INGRESOS;
+    categoriaIn.innerHTML = lista.map(c => `<option>${c}</option>`).join('');
+  }
+
+  function parsearCantidad(txt){
+    const n = parseFloat(String(txt).replace(',', '.'));
+    return isNaN(n) ? null : n;
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const cantidad = parsearCantidad(cantidadIn.value);
+    const concepto = conceptoIn.value.trim();
+    if (!concepto || cantidad === null || cantidad <= 0) return;
+
+    const fecha = fechaIn.value || hoyISO();
+    if (editandoId !== null){
+      const m = movimientos.find(x => x.id === editandoId);
+      Object.assign(m, { tipo, cantidad, concepto, categoria: categoriaIn.value, fecha });
+    } else {
+      movimientos.push({ id: Date.now(), tipo, cantidad, concepto, categoria: categoriaIn.value, fecha });
+    }
+    guardar();
+    cancelarEdicion();
+    filtroMes.value = fecha.slice(0,7);
+    render();
+  });
+
+  function editar(id){
+    const m = movimientos.find(x => x.id === id);
+    if (!m) return;
+    setTipo(m.tipo);
+    conceptoIn.value = m.concepto;
+    cantidadIn.value = String(m.cantidad).replace('.', ',');
+    categoriaIn.value = m.categoria;
+    fechaIn.value = m.fecha;
+    editandoId = id;
+    $('tituloForm').textContent = 'Editar movimiento';
+    $('btnGuardar').textContent = 'Guardar cambios';
+    $('btnCancelar').hidden = false;
+    window.scrollTo({top:0, behavior:'smooth'});
+    conceptoIn.focus();
+  }
+
+  function cancelarEdicion(){
+    editandoId = null;
+    $('tituloForm').textContent = 'Añadir movimiento';
+    $('btnGuardar').textContent = 'Añadir';
+    $('btnCancelar').hidden = true;
+    conceptoIn.value = '';
+    cantidadIn.value = '';
+    fechaIn.value = hoyISO();
+  }
+
+  function borrar(id){
+    if (!confirm('¿Borrar este movimiento?')) return;
+    movimientos = movimientos.filter(x => x.id !== id);
+    if (editandoId === id) cancelarEdicion();
+    guardar();
+    render();
+  }
+
+  // ---------- render ----------
+  function movimientosDelMes(mes){
+    return movimientos.filter(m => m.fecha.startsWith(mes));
+  }
+  function suma(lista){
+    return lista.reduce((s, m) => s + m.cantidad, 0);
+  }
+
+  function render(){
+    const mes = mesVisto();
+    const delMes = movimientosDelMes(mes);
+    const ingresos = suma(delMes.filter(m => m.tipo === 'ingreso'));
+    const gastos = suma(delMes.filter(m => m.tipo === 'gasto'));
+    const total = movimientos.reduce((s, m) => s + (m.tipo === 'ingreso' ? m.cantidad : -m.cantidad), 0);
+
+    const st = $('saldoTotal');
+    st.textContent = (total > 0 ? '+ ' : '') + eur(total);
+    st.className = total > 0 ? 'pos' : (total < 0 ? 'neg' : '');
+
+    $('tIngresos').textContent = eur(ingresos);
+    $('tGastos').textContent = eur(gastos);
+    const bal = $('tBalance');
+    bal.textContent = (ingresos - gastos > 0 ? '+ ' : '') + eur(ingresos - gastos);
+    bal.className = ingresos - gastos > 0 ? 'pos' : (ingresos - gastos < 0 ? 'neg' : '');
+
+    renderHistorial(delMes);
+    renderCategorias(delMes.filter(m => m.tipo === 'gasto'));
+    renderGrafico(mes);
+  }
+
+  function renderHistorial(delMes){
+    const ordenados = delMes.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
+    $('vacio').hidden = ordenados.length > 0;
+    $('lista').innerHTML = ordenados.map(m => `
+      <li class="mov ${m.tipo}">
+        <span class="icono">${EMOJIS[m.categoria] || (m.tipo === 'ingreso' ? '💵' : '📦')}</span>
+        <div class="info">
+          <strong>${esc(m.concepto)}</strong>
+          <span>${m.categoria} · ${fechaBonita(m.fecha)}</span>
+        </div>
+        <span class="importe">${m.tipo === 'ingreso' ? '+' : '−'} ${eur(m.cantidad)}</span>
+        <div class="btns">
+          <button onclick="editar(${m.id})" title="Editar">✏️</button>
+          <button onclick="borrar(${m.id})" title="Borrar">🗑️</button>
+        </div>
+      </li>`).join('');
+  }
+
+  function renderCategorias(gastos){
+    const porCat = {};
+    gastos.forEach(m => porCat[m.categoria] = (porCat[m.categoria] || 0) + m.cantidad);
+    const entradas = Object.entries(porCat).sort((a, b) => b[1] - a[1]);
+    $('panelCategorias').hidden = entradas.length === 0;
+    if (!entradas.length) return;
+    const max = entradas[0][1];
+    $('categorias').innerHTML = entradas.map(([cat, total]) => `
+      <div class="cat">
+        <span class="cat-nombre">${EMOJIS[cat] || '📦'} ${cat}</span>
+        <div class="cat-barra"><div style="width:${(total / max * 100).toFixed(1)}%"></div></div>
+        <span class="cat-total">${eur(total)}</span>
+      </div>`).join('');
+  }
+
+  function renderGrafico(mesFin){
+    const meses = [];
+    for (let i = 5; i >= 0; i--) meses.push(desplazarMes(mesFin, -i));
+    const datos = meses.map(mes => {
+      const dm = movimientosDelMes(mes);
+      return {
+        mes,
+        ing: suma(dm.filter(m => m.tipo === 'ingreso')),
+        gas: suma(dm.filter(m => m.tipo === 'gasto'))
+      };
+    });
+    const max = Math.max(1, ...datos.flatMap(d => [d.ing, d.gas]));
+    $('grafico').innerHTML = datos.map(d => {
+      const numMes = Number(d.mes.slice(5,7)) - 1;
+      const hIng = d.ing > 0 ? Math.max(d.ing / max * 100, 3) : 0;
+      const hGas = d.gas > 0 ? Math.max(d.gas / max * 100, 3) : 0;
+      return `
+      <div class="col ${d.mes === mesFin ? 'actual' : ''}">
+        <div class="barras" title="${MESES[numMes]}: +${eur(d.ing)} ingresos / −${eur(d.gas)} gastos">
+          <div class="barra ing" style="height:${hIng.toFixed(1)}%"></div>
+          <div class="barra gas" style="height:${hGas.toFixed(1)}%"></div>
+        </div>
+        <span class="etq">${MESES[numMes]}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ---------- arranque ----------
+  filtroMes.value = mesActual();
+  fechaIn.value = hoyISO();
+  setTipo('gasto');
+  render();
+
+  filtroMes.addEventListener('change', render);
+  $('mesAnterior').addEventListener('click', () => { filtroMes.value = desplazarMes(mesVisto(), -1); render(); });
+  $('mesSiguiente').addEventListener('click', () => { filtroMes.value = desplazarMes(mesVisto(), 1); render(); });
+  $('btnGasto').addEventListener('click', () => setTipo('gasto'));
+  $('btnIngreso').addEventListener('click', () => setTipo('ingreso'));
+  $('btnCancelar').addEventListener('click', cancelarEdicion);
+</script>
+</body>
+</html>
