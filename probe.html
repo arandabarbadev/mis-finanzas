@@ -24,8 +24,8 @@ li{margin:12px 0;font-size:1.05rem;list-style:none}
 <p id="extra">Abre esta página, espera 20 segundos y cuenta qué líneas se pusieron en verde o en rojo.</p>
 
 <script type="module">
-const ok = (id, txt) => { const el = document.getElementById(id); el.className = 'ok'; el.textContent = '✅ ' + txt; };
-const fail = (id, txt) => { const el = document.getElementById(id); el.className = 'fail'; el.textContent = '❌ ' + txt; };
+const ok = (id, txt) => { console.log('PROBE|' + id + '|OK|' + txt); const el = document.getElementById(id); el.className = 'ok'; el.textContent = '✅ ' + txt; };
+const fail = (id, txt) => { console.log('PROBE|' + id + '|FALLO|' + txt); const el = document.getElementById(id); el.className = 'fail'; el.textContent = '❌ ' + txt; };
 
 ok('p1', 'JavaScript: funciona');
 
