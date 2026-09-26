@@ -35,7 +35,7 @@ let donut = null, barras = null;
 let editando = { mov: null, cuenta: null, categoria: null, meta: null };
 let movTipo = 'gasto';
 let tipoCategoria = 'gasto';
-let colorCuenta = PALETA[0], colorCategoria = PALETA[3], colorMeta = PALETA[0];
+let colorCuenta = PALETA[0], colorCatSel = PALETA[3], colorMeta = PALETA[0];
 
 // ---------- utilidades ----------
 function eur(n){ return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }); }
@@ -419,8 +419,8 @@ function abrirModalCategoria(id = null){
   $('tituloCategoria').textContent = c ? 'Editar categoría' : 'Nueva categoría';
   $('catNombre').value = c ? c.nombre : '';
   setTipoCategoria(c ? c.tipo : 'gasto');
-  colorCategoria = c ? c.color : PALETA[3];
-  pintarSwatches($('swCategoria'), colorCategoria, col => colorCategoria = col);
+  colorCatSel = c ? c.color : PALETA[3];
+  pintarSwatches($('swCategoria'), colorCatSel, col => colorCatSel = col);
   $('catError').hidden = true;
   abrirModal('modalCategoria');
   $('catNombre').focus();
@@ -607,7 +607,7 @@ $('formCuenta').addEventListener('submit', e => {
 
 $('formCategoria').addEventListener('submit', e => {
   e.preventDefault();
-  const datos = { nombre: $('catNombre').value.trim(), tipo: tipoCategoria, color: colorCategoria };
+  const datos = { nombre: $('catNombre').value.trim(), tipo: tipoCategoria, color: colorCatSel };
   if (editando.categoria) editarCategoria(estado.uid, editando.categoria, datos);
   else crearCategoria(estado.uid, datos);
   cerrarModales();
