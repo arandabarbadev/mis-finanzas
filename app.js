@@ -119,7 +119,8 @@ onAuthStateChanged(auth, usuario => {
   if ((usuario.email || '').toLowerCase() !== OWNER_EMAIL){
     const err = $('loginError');
     err.hidden = false;
-    err.textContent = '🔒 Esta app es privada: no se puede entrar con esta cuenta de Google.';
+    err.textContent = '🔒 Esta app es privada. Has entrado como "' + (usuario.email || '?') + '" y esa cuenta no está autorizada.';
+    console.log('ACCESO-DENEGADO|' + (usuario.email || '?'));
     salir();
     return;
   }
