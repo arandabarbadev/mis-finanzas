@@ -1,6 +1,6 @@
 // Service worker: la red manda (los cambios de Pages llegan al instante)
 // y la caché queda solo como respaldo para abrir offline.
-const CACHE = 'misfinanzas-v4';
+const CACHE = 'misfinanzas-v5';
 const ARCHIVOS = [
   './',
   './index.html',
@@ -9,6 +9,10 @@ const ARCHIVOS = [
   './db.js',
   './app.js',
   './manifest.webmanifest',
+  './icono-180.png',
+  './icono-192.png',
+  './icono-512.png',
+  './icono-512-maskable.png',
   'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js',
   'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js',
   'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js',
